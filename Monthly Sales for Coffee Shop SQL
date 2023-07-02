@@ -1,0 +1,35 @@
+CREATE TABLE Coffee_Shop_Sales_Month 
+    (id INTEGER PRIMARY KEY, 
+        drinks TEXT, 
+        add_ons TEXT, 
+        drink_price INTEGER, 
+        add_on_price INTEGER, 
+        quantity INTEGER, 
+        discount INTEGER);
+
+
+
+INSERT INTO Coffee_Shop_Sales_Month VALUES (1, "Vanilla Latte", NULL, 5, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (2, "Caramel Macciato", "Extra Shot", 5, 2, 1, 2);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (3, "Brew Coffee", NULL, 3, NULL, 2, 3);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (4, "Vanilla Latte", "Extra Shot", 5, 2, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (5, "Cold Brew", NULL, 4, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (6, "Latte", "Caramel", 4, 1.50, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (7, "Latte", "Extra Shot and Caramel", 4, 3.5, 1, 2);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (8, "Frappucino", NULL, 6, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (9, "Brew Coffee", NULL, 3, NULL, 4, 3);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (10, "Caramel Macciato", NULL, 5, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (11, "Vanilla Latte", "Extra Shot", 5, 2, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (12, "Vanilla Latte", NULL, 5, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (13, "Vanilla Latte", NULL, 5, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (14, "Vanilla Latte", NULL, 5, NULL, 1, NULL);
+INSERT INTO Coffee_Shop_Sales_Month VALUES (15, "Brew Coffee", NULL, 3, NULL, 1, NULL);
+
+
+UPDATE Coffee_Shop_Sales_Month SET add_on_price =0 WHERE add_on_price is NULL;
+
+UPDATE Coffee_Shop_Sales_Month SET discount =0 WHERE discount is NULL;
+
+SELECT * FROM Coffee_Shop_Sales_Month ORDER BY (((quantity*(drink_price+add_on_price))-discount));
+
+SELECT * FROM Coffee_Shop_Sales_Month WHERE discount >=3;
