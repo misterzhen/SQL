@@ -133,7 +133,11 @@ SELECT product, MIN(price) FROM sales GROUP BY product;
 /*Number of different types of payment*/ 
 SELECT payment_type, COUNT(*) FROM sales GROUP BY payment_type;
 
+/*Number of furniture bought based on country*/ 
+SELECT country, COUNT(*) AS total_furniture_bought FROM sales GROUP BY country;
 
+/*Number of furniture bought based on USA States & Cities*/
+SELECT state, city, COUNT(*) AS total_furniture_bought FROM sales GROUP BY state HAVING country = "United states";
 
 
 
