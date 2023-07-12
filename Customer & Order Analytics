@@ -87,11 +87,11 @@ WHERE length(orderid) = 6
 AND orderid <> 'Order ID';
 
 /* Which product brought in the most revenue in January and how much revenue did it bring in total */
-SELECT Product, (SUM(Quantity)*SUM(price)) AS 'revenue' FROM JanSales
+SELECT Product, (SUM(Quantity*price)) AS 'revenue' FROM JanSales
 GROUP BY Product
 HAVING length(orderid) = 6 
 AND orderid <> 'Order ID'
 ORDER BY revenue DESC 
-LIMIT 1;
+LIMIT 1
 
 
