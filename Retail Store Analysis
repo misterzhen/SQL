@@ -1,0 +1,82 @@
+/* using dataset found at: https://www.kaggle.com/datasets/angelobejaranociotti/retail-db*/
+
+
+/* Find the percent of products sold as Adidas and Nike and no brands*/
+/*Adidas*/
+SELECT
+brand, ROUND(SUM(brand = 'Adidas') / CAST(COUNT(*) AS float), 4) * 100 || '%' AS 'Adidas_percentage'
+FROM brands;
+
+/*Nike*/
+SELECT
+brand, ROUND(SUM(brand = 'Nike') / CAST(COUNT(*) AS float), 4) * 100 || '%' AS 'Nike_percentage'
+FROM brands;
+
+/*No Name Brand*/
+SELECT
+brand, ROUND(SUM(brand = 'None') / CAST(COUNT(*) AS float), 4) * 100 || '%' AS 'No_Name_Brand_percentage'
+FROM brands ;
+
+
+/* Inventory of product sold and it's earning, sorted from most to least */
+SELECT info.product_name, ROUND((finance.modified_revenue/finance.modified_sale_price),0) AS 'quantity', finance.modified_revenue,brands.brand FROM info
+JOIN finance
+ON info.product_id = finance.product_id
+JOIN brands
+ON brands.product_id = info.product_id
+GROUP BY info.product_name
+HAVING finance.modified_revenue <> '0'
+ORDER BY quantity DESC;
+
+
+/* revenue based on brands */
+SELECT brands.brand, SUM(finance.modified_revenue) FROM brands
+JOIN finance
+ON brands.product_id = finance.product_id
+GROUP BY brand
+HAVING brand <> 'None';
+
+/* Find the most expensive products*/
+SELECT brands.product_id, finance.listing_price, finance.modified_listing_price, finance.revenue, info.product_name
+FROM brands
+JOIN finance
+ON brands.product_id = finance.product_id
+JOIN info
+ON brands.product_id = info.product_id
+WHERE finance.listing_price <> 'None' AND finance.modified_listing_price <> '0' AND finance.revenue <> '0'
+GROUP BY brands.product_id
+ORDER BY finance.listing_price DESC LIMIT 20;
+
+
+/*Median Revenue */
+SELECT revenue AS Median
+FROM finance
+ORDER BY revenue ASC
+LIMIT 1 OFFSET 
+    (SELECT COUNT(revenue)/2-1
+    FROM finance
+    ORDER BY revenue ASC);
+
+
+/* Mode; Most bought product */
+SELECT product_name,COUNT(product_name) FROM info
+WHERE product_name <> 'None'
+GROUP BY product_name
+ORDER BY COUNT(product_name) DESC
+LIMIT 1; 
+
+
+/* Comparison of product and when it was bought with revenue */
+SELECT brands.product_id, finance.modified_listing_price, finance.revenue, info.product_name, DATE(traffic.modified_last_visited) AS 'date'
+FROM brands
+JOIN finance
+ON brands.product_id = finance.product_id
+JOIN info
+ON brands.product_id = info.product_id
+JOIN traffic
+ON brands.product_id = traffic.product_id
+GROUP BY DATE(traffic.modified_last_visited), info.product_name
+HAVING finance.listing_price <> 'None' AND finance.modified_listing_price <> '0' AND finance.revenue <> '0'
+AND traffic.modified_last_visited IS NOT NULL
+ORDER BY finance.listing_price , finance.revenue DESC
+
