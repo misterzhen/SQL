@@ -1,0 +1,125 @@
+/* Who are the artists with the TOP 50 songs and how many songs do they have on the TOP50*/
+SELECT artist_name, COUNT(track_name) FROM Spotifydata
+GROUP BY artist_name ;
+
+/* Who has the most songs in the TOP50 and what are they? */
+SELECT artist_name, COUNT(track_name) FROM Spotifydata
+GROUP BY artist_name 
+ORDER BY COUNT(track_name) DESC;
+
+SELECT artist_name, track_name FROM Spotifydata
+WHERE artist_name LIKE 'Olivia Rodrigo' OR artist_name LIKE 'Doja Cat'
+GROUP BY track_name;
+
+/* what are the TOP10 songs?*/
+SELECT artist_name, track_name, popularity FROM Spotifydata
+ORDER BY popularity DESC LIMIT 10;
+
+/* Which songs scored the highest popularity*/
+SELECT popularity, COUNT(popularity), track_name FROM Spotifydata
+GROUP BY track_name
+ORDER BY popularity DESC LIMIT 10;
+
+/* which songs have the lowest energy */
+SELECT artist_name, track_name, popularity, energy FROM Spotifydata
+ORDER BY energy ASC LIMIT 10;
+
+
+/* what is the least popular song, most popular song, songs with average ratings */
+SELECT artist_name, track_name, min(popularity) FROM Spotifydata
+UNION
+SELECT artist_name, track_name, MAX(popularity) FROM Spotifydata;
+
+/* How many artists are there in the TOP50 songs */
+SELECT COUNT(DISTINCT(artist_name)) FROM Spotifydata;
+
+
+/* My personal favorite artist is Ed Sheeran. How many songs are in the TOP 50 by Ed Sheeran?*/
+SELECT artist_name, track_name, popularity FROM Spotifydata
+WHERE artist_name LIKE 'Ed Sheeran';
+
+/* How many beats do each songs contains */
+SELECT artist_name, track_name, (tempo*.001*duration_ms) AS 'num_beats' FROM Spotifydata 
+ORDER BY num_beats DESC;
+
+/* what keys and modalitiy of each song? Do artists use the same keys for each song? */
+SELECT artist_name, track_name,
+   CASE 
+       WHEN key = '0' THEN 'C'
+       WHEN key = '1' THEN 'C#/Db'
+       WHEN key = '2' THEN 'D'
+       WHEN key = '3' THEN 'D#/Eb'
+       WHEN key = '4' THEN 'E'
+       WHEN key = '5' THEN 'F'
+       WHEN key = '6' THEN 'F#/Gb'
+       WHEN key = '7' THEN 'G'
+       WHEN key = '8' THEN 'G#/Ab'
+       WHEN key = '9' THEN 'A'
+       WHEN key = '10' THEN 'A#/Bb'
+       WHEN key = '11' THEN 'B'
+       ELSE 'no_key_detected'
+       END
+|| ' ' ||
+    CASE
+        WHEN mode = '1' THEN 'Major'
+        ELSE 'Minor'
+        END AS 'Musical_Note_Key'
+FROM Spotifydata 
+Order BY artist_name;
+
+/* what is the most used key note without being in major and minor? */
+SELECT 
+   CASE 
+       WHEN key = '0' THEN 'C'
+       WHEN key = '1' THEN 'C#/Db'
+       WHEN key = '2' THEN 'D'
+       WHEN key = '3' THEN 'D#/Eb'
+       WHEN key = '4' THEN 'E'
+       WHEN key = '5' THEN 'F'
+       WHEN key = '6' THEN 'F#/Gb'
+       WHEN key = '7' THEN 'G'
+       WHEN key = '8' THEN 'G#/Ab'
+       WHEN key = '9' THEN 'A'
+       WHEN key = '10' THEN 'A#/Bb'
+       WHEN key = '11' THEN 'B'
+       ELSE 'no_key_detected'
+       END AS 'musical_key',
+       COUNT(*)
+
+FROM Spotifydata 
+GROUP BY musical_key
+Order BY COUNT(*) DESC LIMIT 1;
+
+/* what is the most used key note with being in major and minor? */
+SELECT 
+   CASE 
+       WHEN key = '0' THEN 'C'
+       WHEN key = '1' THEN 'C#/Db'
+       WHEN key = '2' THEN 'D'
+       WHEN key = '3' THEN 'D#/Eb'
+       WHEN key = '4' THEN 'E'
+       WHEN key = '5' THEN 'F'
+       WHEN key = '6' THEN 'F#/Gb'
+       WHEN key = '7' THEN 'G'
+       WHEN key = '8' THEN 'G#/Ab'
+       WHEN key = '9' THEN 'A'
+       WHEN key = '10' THEN 'A#/Bb'
+       WHEN key = '11' THEN 'B'
+       ELSE 'no_key_detected'
+       END 
+       || ' ' ||
+    CASE
+        WHEN mode = '1' THEN 'Major'
+        ELSE 'Minor'
+        END AS 'Musical_Note_Key',
+       COUNT(*)
+
+FROM Spotifydata 
+GROUP BY Musical_Note_Key
+Order BY COUNT(*) DESC LIMIT 1;
+
+/* Which songs involve more than 1 artist */
+SELECT track_name FROM Spotifydata
+WHERE track_name LIKE '%feat%'
+GROUP BY track_name;
+
