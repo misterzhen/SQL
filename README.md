@@ -1,32 +1,33 @@
-# Ming Zhen's SQL Portfolio
+#### **SQL Projects Portfolio**
 
-**Description**
-Welcome to my SQL Portfolio! This repository showcases my skills and expertise in SQL (Structured Query Language). In this portfolio, you will find a collection of SQL projects, queries, and scripts that demonstrate my proficiency in working with databases.
+Welcome to my SQL Projects Portfolio! This repository showcases my skills and expertise in SQL (Structured Query Language) through a collection of diverse and engaging projects, queries, and scripts. These projects demonstrate my proficiency in working with databases and my ability to extract valuable insights from data.
 
-<ins>Projects:</ins>
+## **Projects:**
 
- 1. Project 1: Monthly Sales for Coffee Shop SQL
-The very first project I tried from Khan Academy's "Intro to SQL: Design a Store Database." I was exposed to the fundamental cocepts of SQL and database design in the context of a home maded store database. Through this project, I learned how to create a simple database schema while thinking about columns and rows (structures). 
+**Project 1: Monthly Sales for Coffee Shop SQL**
 
- 2. Project 2: Furniture Store Sales
-This project was also provided from Kham Academy's "Intro to SQL: Data Dig." This project I learned to fundamentals of finding the minimum, maximum, averages of different values. In addition to the aggregated functions and values in SQL, I tried to find insights and trends among the data that was given.
+This project was my first attempt at applying SQL concepts from Khan Academy's "Intro to SQL: Design a Store Database." It provided an excellent introduction to SQL and database design by working on a simple home-made store database. I learned how to create a well-structured database schema while considering essential column and row structures.
 
- 3. Project 3: Netflix Analytics (SQL Fiddle)
- This project was to learn SQL Fiddle, a free online browser platform. This project explored PostgreSQL instead of the MYSQL dialect. Then I was able to my inquiries about some of Netflix's shows and films.
+**Project 2: Furniture Store Sales**
 
- 4. Project 4: Customer & Order Analytics
-This project is to start learning SQL on the program SQLite Studio. I was given a database, BIT.db, and I learned to extract information and answer given questions. 
- 
- 5. Project 5: Spotify SQL Analysis
-For this project, I downloaded a -.cvs file from Kaggle. This project was a little unusual where I have to establish questions myself and make inquiries on that. Although it was a litte more difficule, I was to show as much information I was able to think of.
+From Khan Academy's "Intro to SQL: Data Dig," this project focused on learning the fundamentals of finding minimum, maximum, and average values using SQL's aggregated functions. Additionally, I explored the data to identify insights and trends, gaining valuable experience in data analysis.
 
- 6. Project 6: Digital Media Store
-This is the final project from the BreakIntoTech Bootcamp. I was given a database with a complicated schema. I performed different data analysis peering into different areas of the business such as: sales, employees, inventory, etc. Since this is the final project for learning SQL, there is a huge amount of questions and information I looked into.
+**Project 3: Netflix Analytics (SQL Fiddle)**
 
+This project aimed to familiarize myself with SQL Fiddle, a free online browser platform. I ventured into using PostgreSQL instead of the MySQL dialect and applied my queries to analyze some of Netflix's shows and films.
 
+**Project 4: Customer & Order Analytics**
 
+In this project, I began learning SQL on the program SQLite Studio. Given the BIT.db database, I honed my skills in extracting information and answering specific questions related to customer data and order metrics.
 
+**Project 5: Spotify SQL Analysis**
 
+For this unique project, I downloaded a .csv file from Kaggle and took the initiative to formulate my own questions for analysis. I explored various aspects of the data related to Spotify, allowing me to demonstrate creativity in my SQL inquiries.
 
+**Project 6: Digital Media Store**
 
-    
+As the final project from the BreakIntoTech Bootcamp, this was an advanced undertaking with a complex database schema. I conducted extensive data analysis covering different aspects of the business, including sales, employees, and inventory. This comprehensive project pushed me to explore numerous SQL techniques and tackle a diverse range of questions.
+
+Feel free to explore these projects and witness my journey of continuous learning and growth in SQL.
+
+Thank you for visiting my SQL Projects Portfolio. I hope these projects reflect my passion for SQL and its applications in data analysis. If you have any questions or feedback, please don't hesitate to reach out. Happy querying! 📊🚀
