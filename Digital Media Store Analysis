@@ -1,0 +1,606 @@
+# For this project, I was given a database and a complicated schema. 
+# I made inquiries about a digital media store
+
+
+
+/* When did the invoice start and ends? How many years? */
+SELECT MIN(InvoiceDate) AS 'earliest_record', MAX(InvoiceDate) AS 'latest_record', (MAX(InvoiceDate)-MIN(InvoiceDate)+1) AS 'years_of_invoices' FROM invoices;
+
+/* Who bought the most from this store and how much? */
+SELECT customers.FirstName, customers.LastName, invoices.Total
+FROM customers
+LEFT JOIN invoices
+ON customers.CustomerId = invoices.InvoiceId 
+ORDER BY invoices.Total DESC;
+
+/* Seems like there are multiple customers with the same total. What tracks did they buy? */
+SELECT customers.FirstName || ' ' || customers. LastName AS 'FullName', invoice_items.trackID, tracks.Name
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.InvoiceId 
+JOIN invoice_items
+ON invoice_items.InvoiceID = invoices.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+ORDER BY invoices.Total DESC;
+
+/* Is the store based locally or online/shipping? */
+SELECT invoices.BillingAddress || ' ' || invoices.BillingCity || ' '|| invoices.BillingState || ' '|| invoices.BillingCountry AS 'invoice_address', 
+    customers.Address || ' ' || customers.City || ' ' || customers.Country AS 'customer_address', 
+    employees.Address || ' ' || employees.City || ' ' || employees.Country AS 'employee_address'
+FROM invoices
+JOIN customers
+ON invoices.CustomerID = customers.CustomerId
+JOIN employees
+ON employees.EmployeeId = customers.SupportRepId
+GROUP BY invoice_address; 
+/* Looks like the store is based in Canada, but cannot conclude if the store is online or in-store. */
+
+/* which artists have the highest album sales based on countries, zipcode? */
+
+/* what is the total revenue for each year? */
+SELECT SUBSTR(InvoiceDate,1,4) AS 'year', ROUND(SUM(total),2) AS 'annual_revenue' FROM invoices
+WHERE InvoiceDate LIKE "2009%"
+UNION
+SELECT SUBSTR(InvoiceDate,1,4)AS 'year',ROUND(SUM(total),2) AS 'annual_revenue' FROM invoices
+WHERE InvoiceDate LIKE "2010%"
+UNION
+SELECT SUBSTR(InvoiceDate,1,4)AS 'year',ROUND(SUM(total),2) AS 'annual_revenue' FROM invoices
+WHERE InvoiceDate LIKE "2011%"
+UNION
+SELECT SUBSTR(InvoiceDate,1,4)AS 'year',ROUND(SUM(total),2) AS 'annual_revenue' FROM invoices
+WHERE InvoiceDate LIKE "2012%"
+UNION
+SELECT SUBSTR(InvoiceDate,1,4)AS 'year',ROUND(SUM(total),2) AS 'annual_revenue' FROM invoices
+WHERE InvoiceDate LIKE "2013%";
+
+/* What files do we sell in?*/
+SELECT media_types.Name FROM media_types
+JOIN tracks
+ON media_types.MediaTypeId = tracks.MediaTypeId
+JOIN invoice_items
+ON tracks.TrackId = invoice_items.TrackID
+GROUP BY media_types.Name;
+
+/*How much do each file type costs? Order by Cost.*/
+SELECT media_types.Name, invoice_items.UnitPrice FROM media_types
+JOIN tracks
+ON media_types.MediaTypeId = tracks.MediaTypeId
+JOIN invoice_items
+ON tracks.TrackId = invoice_items.TrackID
+GROUP BY media_types.Name
+ORDER BY invoice_items.UnitPrice DESC;
+
+/* who bought the most expensive file type */
+SELECT
+customers.FirstName || ' ' || customers.LastName AS 'Customer_FullName'
+FROM customers
+JOIN invoices
+ON invoices.CustomerId = customers.CustomerID
+JOIN invoice_items
+ON invoice_items.InvoiceId = invoices.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+JOIN media_types
+ON media_types.MediaTypeId = tracks.MediaTypeId
+WHERE invoice_items.UnitPrice = '1.99'
+GROUP BY Customer_FullName;
+
+/* Who do the employees report to?*/
+SELECT 
+    employees.FirstName || ' ' || employees.LastName AS 'employees_fullname', 
+    reportingto.FirstName || ' ' || reportingto.LastName AS 'Manager_fullname'
+FROM employees
+JOIN employees AS 'reportingto' 
+ON reportingto.EmployeeID = employees.ReportsTo;
+
+/* Show Customers (their full names, customer ID, and country) who are not in the US.*/
+SELECT FirstName ||' '|| LastName AS 'fullname', CustomerID, Country
+FROM customers
+WHERE Country <> 'USA';
+
+/*Show only the Customers from Brazil.
+Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.*/
+SELECT customers.FirstName ||' '|| customers.LastName AS 'fullname', invoices.InvoiceId, invoices.BillingCountry
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+WHERE customers.Country = 'Brazil';
+
+/*Show the Employees who are Sales Agents.*/
+SELECT EmployeeID, FirstName || ' ' || LastName AS 'Full_Name', title
+FROM employees
+WHERE title LIKE '%Sales%';
+
+/*Find a unique/distinct list of billing countries from the Invoice table.*/
+SELECT DISTINCT(BillingCountry) FROM invoices;
+
+/*Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name.*/
+SELECT invoices.InvoiceId, employees.FirstName || ' ' || employees.LastName AS 'Sales_Full_Name'
+FROM employees
+JOIN customers
+ON employees.EmployeeId = customers.SupportRepId
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId;
+
+/*Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.*/
+SELECT  invoices.Total, 
+customers.FirstName || ' ' || customers.LastName AS 'Customers_Full_Name', customers.Country,
+employees.FirstName || ' ' || employees.LastName AS 'Sales_Full_Name'
+FROM invoices
+JOIN customers
+ON invoices.CustomerID = customers.CustomerId
+JOIN employees
+ON employees.EmployeeId = customers.SupportRepId;
+
+/*How many Invoices were there in 2009?*/
+SELECT COUNT(InvoiceID) AS 'invoices_in_2009' FROM invoices
+WHERE InvoiceDate LIKE '2009%';
+
+/*Write a query that includes the purchased track name AND artist name with each invoice line ID.*/
+SELECT invoice_items.InvoiceId, tracks.Name AS 'track_name', artists.Name AS 'artist'
+FROM invoice_items
+JOIN tracks
+ON invoice_items.TrackId = tracks.TrackId
+JOIN albums
+ON tracks.AlbumId = albums.AlbumId
+JOIN artists
+ON artists.ArtistId = albums.ArtistId;
+
+/*Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.*/
+SELECT tracks.Name AS 'track', albums.Title AS 'album', media_types.Name AS 'media_file', genres.Name AS 'genre'
+FROM tracks
+JOIN albums
+ON tracks.AlbumId = albums.AlbumId
+LEFT JOIN media_types
+ON media_types.MediaTypeID = tracks.MediaTypeId
+LEFT JOIN genres
+ON tracks.GenreId = genres.GenreID;
+
+/*Show the total sales made by each sales agent and include the number of orders.*/
+SELECT  employees.FirstName || ' ' || employees.LastName AS 'FullName', 
+SUM(invoice_items.Quantity) AS 'Number_of_Orders',
+ROUND(SUM(invoices.Total),2) AS 'Sales'
+FROM employees
+JOIN customers
+ON employees.EmployeeId = customers.SupportRepId
+JOIN invoices
+ON invoices.CustomerId = customers.CustomerId
+JOIN invoice_items
+ON invoices.InvoiceId = invoice_items.InvoiceLineId
+GROUP BY FullName;
+
+/*Which sales agent made the most dollars in sales in 2009?*/
+SELECT employees.FirstName || ' ' || employees.LastName AS 'Full_Name'
+FROM employees
+JOIN customers
+ON employees.EmployeeId = customers.SupportRepId
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+WHERE invoices.InvoiceDate LIKE '%2009%' 
+GROUP BY Full_Name
+ORDER BY SUM(invoices.Total) DESC LIMIT 1;
+
+/* Who sold the most for each year? */
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2009' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2009%'
+GROUP BY FullName
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2010' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2010%'
+GROUP BY FullName 
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2011' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2011%'
+GROUP BY FullName
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2012' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2012%'
+GROUP BY FullName
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2013' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2013%'
+GROUP BY FullName
+ORDER BY Sales DESC LIMIT 5;
+
+/* How much did each person sold in each year?*/
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2009' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2009%'
+GROUP BY FullName 
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2010' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2010%'
+GROUP BY FullName 
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2011' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2011%'
+GROUP BY FullName
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2012' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2012%'
+GROUP BY FullName
+UNION
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', ROUND(SUM(invoices.Total),2) AS 'Sales', '2013' AS 'year'
+FROM invoices
+JOIN customers
+ON invoices.CustomerId = customers.CustomerId
+JOIN employees
+ON customers.SupportRepId = employees.EmployeeId
+WHERE InvoiceDate LIKE '2013%'
+GROUP BY FullName
+ORDER BY year ASC;
+
+/* What is the top 5 popular genre sold */
+SELECT genres.Name, COUNT(invoice_items.trackID) AS 'tracks' FROM genres
+JOIN tracks
+ON genres.GenreId = tracks.GenreId
+JOIN invoice_items
+ON tracks.TrackId = invoice_items.TrackId
+GROUP BY genres.Name
+ORDER BY tracks DESC LIMIT 5;
+
+/*What are some of the companies who ordered from the store? */
+SELECT Company FROM customers
+WHERE Company IS NOT NULL
+ORDER BY Company ASC;
+
+/* List all the tracks in each playlist */
+SELECT playlists.PlaylistId, playlists.Name, tracks.Name
+FROM playlists
+JOIN playlist_track
+ON playlists.PlaylistId = playlist_track.PlaylistId
+JOIN tracks
+ON playlist_track.TrackId = tracks.TrackId
+ORDER BY playlists.PlaylistId ASC;
+
+/* What are the genre's in each playlist? */
+SELECT  playlists.PlaylistId, playlists.Name AS 'playlist', genres.Name, COUNT(genres.Name)
+FROM playlists
+JOIN playlist_track
+ON playlists.PlaylistId = playlist_track.PlaylistId
+JOIN tracks
+ON playlist_track.TrackId = tracks.TrackId
+JOIN genres
+ON genres.GenreId = tracks.GenreId
+GROUP BY playlists.Name, genres.Name, playlists.PlaylistId
+ORDER BY playlists.PlaylistId ASC;
+
+/* Looks like there's some playlists without any tracks in it. Which playlists are empty (have no tracks)? */
+SELECT playlists.PlaylistId, playlists.Name
+FROM playlists
+LEFT JOIN playlist_track
+ON playlists.PlaylistId = playlist_track.PlaylistId
+GROUP BY playlists.PlaylistId
+HAVING playlist_track.PlaylistId IS NULL;
+
+/* What are the average size of each file type in MB? 
+(1 MB = 1000000 byte)*/
+SELECT ROUND(AVG(tracks.Bytes/1000000),2) AS 'avg_size_ MB',
+ media_types.Name
+FROM tracks
+JOIN media_types
+ON tracks.MediaTypeId = media_types.MediaTypeId
+GROUP BY media_types.Name;
+
+/* Wanting to download entire playlists, 
+how much capacity do I need for each playlist? */
+SELECT  playlists.PlaylistId, playlists.Name, ROUND((SUM(tracks.Bytes)/1000000),2) AS 'size_MB'
+FROM playlists
+JOIN playlist_track
+ON playlist_track.PlaylistId = playlists.PlaylistId
+JOIN tracks
+ON tracks.TrackId = playlist_track.TrackId
+GROUP BY playlists.PlaylistId, playlists.Name;
+
+/* how much do each Playlist would cost */
+SELECT playlist_track.PlaylistId, playlists.Name, (COUNT(*)*UnitPrice) AS 'cost'
+FROM playlists
+JOIN playlist_track
+ON playlist_track.PlaylistId = playlists.PlaylistId
+JOIN tracks
+ON tracks.TrackId = playlist_track.TrackId
+GROUP BY playlist_track.PlaylistId;
+
+/* How many tracks/files are in each playlist?*/
+SELECT playlist_track.PlaylistId, playlists.Name, COUNT(*) AS 'num_tracks'
+FROM playlists
+JOIN playlist_track
+ON playlist_track.PlaylistId = playlists.PlaylistId
+JOIN tracks
+ON tracks.TrackId = playlist_track.TrackId
+GROUP BY playlist_track.PlaylistId;
+
+/* Some playlists have the same name, do they have the same exact tracks?*/
+WITH music_1 AS(
+    SELECT
+playlist_track.PlaylistId, playlists.Name, tracks.TrackID
+FROM playlists
+JOIN playlist_track
+ON playlist_track.PlaylistId = playlists.PlaylistId
+JOIN tracks
+ON tracks.TrackId = playlist_track.TrackId
+WHERE playlist_track.PlaylistId = 1)
+
+SELECT DISTINCT tracks.TrackID
+FROM playlists
+JOIN playlist_track
+ON playlist_track.PlaylistId = playlists.PlaylistId
+JOIN tracks
+ON tracks.TrackId = playlist_track.TrackId
+JOIN music_1
+ON music_1.PlaylistId = playlist_track.PlaylistId
+GROUP BY tracks.TrackID; 
+/* results in the same tracks in playlist MUSIC */
+
+/* Classical playist is split among 3 smaller playlist */
+SELECT *, COUNT(*)
+FROM playlist_track
+WHERE PlaylistID Between 13 AND 15
+GROUP BY TrackId;
+
+SELECT *, COUNT(*)
+FROM playlist_track
+WHERE PlaylistID Between 12 AND 15
+GROUP BY TrackId;
+
+/* How old are the employees when they got hired? How long have each workers worked at the company? (Include job roles and order by age)*/
+SELECT employees.FirstName || ' ' || employees.LastName AS 'FullName', 
+(HireDate-BirthDate) AS 'Age', 
+(2013-HireDate) AS 'years_worked',
+employees.Title
+FROM employees
+GROUP BY FullName
+ORDER BY years_worked DESC;
+
+/* what genre do customers from different countries bought*/
+SELECT customers.Country, genres.Name, COUNT(*)
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+JOIN invoice_items
+ON invoice_items.InvoiceId = invoices.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+JOIN genres
+ON genres.GenreId = tracks.GenreId
+GROUP BY customers.Country, genres.Name
+ORDER BY customers.Country ASC, COUNT(*) DESC; 
+
+/* What are the top genre(s) of each countries */
+SELECT customers.Country, genres.Name, COUNT(*)
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+JOIN invoice_items
+ON invoice_items.InvoiceId = invoices.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+JOIN genres
+ON genres.GenreId = tracks.GenreId
+GROUP BY customers.Country, genres.Name
+HAVING customers.Country LIKE 'Argentina'
+ORDER BY customers.Country ASC, COUNT(*) DESC LIMIT 2;
+
+SELECT customers.Country, genres.Name, COUNT(*)
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+JOIN invoice_items
+ON invoice_items.InvoiceId = invoices.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+JOIN genres
+ON genres.GenreId = tracks.GenreId
+GROUP BY customers.Country, genres.Name
+HAVING customers.Country LIKE 'Australia'
+ORDER BY customers.Country ASC, COUNT(*) DESC LIMIT 1;
+
+/* what is the average cost per track's revenue */
+SELECT
+ROUND(SUM(invoice_items.UnitPrice)/COUNT(invoice_items.InvoiceLineId),2) AS 'Average'
+FROM invoices
+JOIN invoice_items
+ON invoices.InvoiceId = invoice_items.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId;
+
+/* How much did each tracks sold for */
+SELECT tracks.TrackId, tracks.Name,
+(invoice_items.UnitPrice*COUNT(invoices.InvoiceId)) AS 'total'
+FROM invoices
+JOIN invoice_items
+ON invoices.InvoiceId = invoice_items.InvoiceId
+JOIN tracks
+ON tracks.TrackId = invoice_items.TrackId
+GROUP BY tracks.TrackId
+ORDER BY invoices.InvoiceId ASC;
+
+/* What is the average of inovices per month in all years?*/
+SELECT ROUND(COUNT(InvoiceDate)/(12*(MAX(InvoiceDate) - MIN(InvoiceDate) +1)),4) AS 'sales/month' FROM invoices;
+
+/*What are the lowest revenue for each months in each year? */
+SELECT InvoiceDate, ROUND(MIN(Total),2) AS 'revenue',
+CASE
+WHEN InvoiceDate LIKE '____%01%__________' THEN 'January'
+WHEN InvoiceDate LIKE '____%02%__________' THEN 'Febrary'
+WHEN InvoiceDate LIKE '____%03%__________' THEN 'March'
+WHEN InvoiceDate LIKE '____%04%__________' THEN 'April'
+WHEN InvoiceDate LIKE '____%05%__________' THEN 'May'
+WHEN InvoiceDate LIKE '____%06%__________' THEN 'June'
+WHEN InvoiceDate LIKE '____%07%__________' THEN 'July'
+WHEN InvoiceDate LIKE '____%08%__________' THEN 'August'
+WHEN InvoiceDate LIKE '____%09%__________' THEN 'September'
+WHEN InvoiceDate LIKE '____%10%__________' THEN 'October'
+WHEN InvoiceDate LIKE '____%11%__________' THEN 'November'
+WHEN InvoiceDate LIKE '____%12%__________' THEN 'December'
+END AS 'Month',
+
+CASE
+WHEN InvoiceDate LIKE '2009%' THEN '2009'
+WHEN InvoiceDate LIKE '2010%' THEN '2010'
+WHEN InvoiceDate LIKE '2011%' THEN '2011'
+WHEN InvoiceDate LIKE '2012%' THEN '2012'
+WHEN InvoiceDate LIKE '2013%' THEN '2013'
+END AS 'Year'
+FROM invoices
+GROUP BY Year, Month
+ORDER BY InvoiceDate ASC;
+
+/*What are the highest revenue for each months in each year? */
+SELECT InvoiceDate, MAX(Total),
+CASE
+WHEN InvoiceDate LIKE '____%01%__________' THEN 'January'
+WHEN InvoiceDate LIKE '____%02%__________' THEN 'Febrary'
+WHEN InvoiceDate LIKE '____%03%__________' THEN 'March'
+WHEN InvoiceDate LIKE '____%04%__________' THEN 'April'
+WHEN InvoiceDate LIKE '____%05%__________' THEN 'May'
+WHEN InvoiceDate LIKE '____%06%__________' THEN 'June'
+WHEN InvoiceDate LIKE '____%07%__________' THEN 'July'
+WHEN InvoiceDate LIKE '____%08%__________' THEN 'August'
+WHEN InvoiceDate LIKE '____%09%__________' THEN 'September'
+WHEN InvoiceDate LIKE '____%10%__________' THEN 'October'
+WHEN InvoiceDate LIKE '____%11%__________' THEN 'November'
+WHEN InvoiceDate LIKE '____%12%__________' THEN 'December'
+END AS 'Month',
+
+CASE
+WHEN InvoiceDate LIKE '2009%' THEN '2009'
+WHEN InvoiceDate LIKE '2010%' THEN '2010'
+WHEN InvoiceDate LIKE '2011%' THEN '2011'
+WHEN InvoiceDate LIKE '2012%' THEN '2012'
+WHEN InvoiceDate LIKE '2013%' THEN '2013'
+END AS 'Year'
+FROM invoices
+GROUP BY Year, Month
+ORDER BY InvoiceDate ASC;
+
+/*What are the total revenue for each months in each year? */
+SELECT
+CASE
+WHEN InvoiceDate LIKE '2009%' THEN '2009'
+WHEN InvoiceDate LIKE '2010%' THEN '2010'
+WHEN InvoiceDate LIKE '2011%' THEN '2011'
+WHEN InvoiceDate LIKE '2012%' THEN '2012'
+WHEN InvoiceDate LIKE '2013%' THEN '2013'
+END AS 'Year',
+CASE
+WHEN InvoiceDate LIKE '____%01%__________' THEN 'January'
+WHEN InvoiceDate LIKE '____%02%__________' THEN 'Febrary'
+WHEN InvoiceDate LIKE '____%03%__________' THEN 'March'
+WHEN InvoiceDate LIKE '____%04%__________' THEN 'April'
+WHEN InvoiceDate LIKE '____%05%__________' THEN 'May'
+WHEN InvoiceDate LIKE '____%06%__________' THEN 'June'
+WHEN InvoiceDate LIKE '____%07%__________' THEN 'July'
+WHEN InvoiceDate LIKE '____%08%__________' THEN 'August'
+WHEN InvoiceDate LIKE '____%09%__________' THEN 'September'
+WHEN InvoiceDate LIKE '____%10%__________' THEN 'October'
+WHEN InvoiceDate LIKE '____%11%__________' THEN 'November'
+WHEN InvoiceDate LIKE '____%12%__________' THEN 'December'
+END AS 'Month',
+ROUND(SUM(Total),2) AS 'revenue'
+FROM invoices
+GROUP BY Year, Month
+ORDER BY InvoiceDate ASC;
+
+/* What are the quartly sales?
+Include a column comparing previous quarters where:
+"+" is increased from last quarter, "-" decreased from last quarter, and "0' same as last quarter.*/
+SELECT
+CASE
+WHEN InvoiceDate LIKE '2009%' THEN '2009'
+WHEN InvoiceDate LIKE '2010%' THEN '2010'
+WHEN InvoiceDate LIKE '2011%' THEN '2011'
+WHEN InvoiceDate LIKE '2012%' THEN '2012'
+WHEN InvoiceDate LIKE '2013%' THEN '2013'
+END AS 'Year',
+CASE
+WHEN InvoiceDate LIKE '____%01%__________' OR InvoiceDate LIKE '____%02%__________' OR InvoiceDate LIKE '____%03%__________' THEN 'Q1'
+WHEN InvoiceDate LIKE '____%04%__________' OR InvoiceDate LIKE '____%05%__________' OR InvoiceDate LIKE '____%06%__________' THEN 'Q2'
+WHEN InvoiceDate LIKE '____%07%__________' OR InvoiceDate LIKE '____%08%__________' OR InvoiceDate LIKE '____%09%__________' THEN 'Q3'
+WHEN InvoiceDate LIKE '____%10%__________' OR InvoiceDate LIKE '____%11%__________' OR InvoiceDate LIKE '____%12%__________' THEN 'Q4'
+END AS 'Quarter',
+ROUND(SUM(Total),2) AS 'revenue',
+CASE
+WHEN ROUND(SUM(Total),2)-LAG(ROUND(SUM(Total),2), 1) over (order by InvoiceDate) > 0 THEN '+'
+WHEN ROUND(SUM(Total),2)-LAG(ROUND(SUM(Total),2), 1) over (order by InvoiceDate) < 0 THEN '-'
+ELSE '0'
+END AS 'increase/decrease from previous quarter'
+FROM invoices
+GROUP BY Year, Quarter
+ORDER BY InvoiceDate ASC;
+
+/* Artist get some money out of each tracks sold. Find out which artist(s) made the most money. */
+SELECT
+artists.Name, COUNT(*) AS 'tracks_sold'
+FROM artists
+JOIN albums
+ON artists.ArtistId = albums.ArtistId
+JOIN tracks
+ON tracks.AlbumId = albums.AlbumId
+JOIN invoice_items
+ON invoice_items.TrackId = tracks.TrackId
+GROUP BY artists.Name
+ORDER BY tracks_sold DESC;
+
+/* How much did each track sold */
+SELECT
+invoice_items.InvoiceId,
+invoice_items.InvoiceLineId,
+tracks.Name,
+invoice_items.UnitPrice,
+COUNT(tracks.Name) AS 'num_of_tracks',
+invoice_items.UnitPrice * COUNT(tracks.Name) AS 'tracks_cost'
+FROM invoice_items
+JOIN tracks
+ON invoice_items.TrackId = tracks.TrackId
+JOIN invoices
+ON invoices.InvoiceId = invoice_items.InvoiceId
+GROUP BY tracks.Name
+ORDER BY tracks_cost DESC;
+
+
